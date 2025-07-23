@@ -43,11 +43,10 @@ jobs:
         git clone https://github.com/momo54181/realme_mtk6853-AndroidS-kernel-source android-kernel
         cd android-kernel
 
-    - name: 更新 SukiSU-Ultra
+    - name: 更新 KernelSU
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-        rm -rf KernelSU
-        curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
+        curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s v0.9.5
 
     - name: 设置ccache缓存
       uses: hendrikmuhs/ccache-action@v1.2
@@ -72,8 +71,12 @@ jobs:
         sed -i 's!block=/dev/block/by-name/boot;!block=auto;!g' AnyKernel3/anykernel.sh
         sed -i 's/is_slot_device=0;/is_slot_device=auto;/g' AnyKernel3/anykernel.sh
         cp android-kernel/out/arch/arm64/boot/Image.gz-dtb AnyKernel3/
-        rm -rf AnyKernel3/.git* AnyKernel3/README.md
-        zip -r AnyKernel3/卡刷包.zip AnyKernel3
+        find AnyKernel3/ -name ".git*" -exec rm -rf {} +
+        rm -f AnyKernel3/README.md
+        KERNEL_VER=$(grep "Linux version" android-kernel/out/.config | awk '{print $3}')
+        DATE=$(date +%Y%m%d)
+        cd AnyKernel3
+        zip -r 卡刷包.zip ./*
         
     - name: 上传 Anykernel3 编译内核 到 Release
       uses: softprops/action-gh-release@v2
